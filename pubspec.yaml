@@ -1,0 +1,47 @@
+name: asistente_docente_ia
+description: "EDUAI DOCENTE - Asistente Docente con IA: pase de lista por voz, métricas de aula y asistente pedagógico."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # Estado
+  provider: ^6.1.2
+
+  # Base de datos local (multiplataforma escritorio)
+  sqflite_common_ffi: ^2.3.3
+  path: ^1.9.0
+  path_provider: ^2.1.4
+
+  # Voz: reconocimiento (pase de lista) y síntesis (locución)
+  speech_to_text: ^7.0.0
+  flutter_tts: ^4.0.2
+
+  # Asistente pedagógico (IA en la nube)
+  http: ^1.2.2
+
+  # Licenciamiento (HWID + AES-256)
+  encrypt: ^5.0.3
+  crypto: ^3.0.3
+
+  # Utilidades
+  intl: ^0.19.0
+  uuid: ^4.4.2
+  shared_preferences: ^2.2.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  # Descomenta y agrega tus fuentes/íconos si los incorporas al proyecto
+  # assets:
+  #   - assets/
