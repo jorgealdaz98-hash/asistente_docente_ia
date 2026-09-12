@@ -4,6 +4,7 @@ import '../core/theme/app_theme.dart';
 import '../providers/curso_provider.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/metric_card.dart';
+import '../widgets/ai_assistant_panel.dart';
 
 class InicioScreen extends StatefulWidget {
   const InicioScreen({super.key});
@@ -25,6 +26,17 @@ class _InicioScreenState extends State<InicioScreen> {
   Widget build(BuildContext context) {
     final cursoProvider = context.watch<CursoProvider>();
     final settings = context.watch<SettingsProvider>();
+    final cursoActual = cursoProvider.cursoSeleccionado;
+    final alumnos = cursoProvider.alumnosDelCurso;
+
+    // Calcular métricas para contexto de IA
+    Map<String, dynamic>? datosContexto;
+    if (cursoActual != null) {
+      datosContexto = {
+        'curso': cursoActual.nombreCompleto,
+        'totalAlumnos': alumnos.length,
+      };
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Inicio')),
@@ -49,8 +61,8 @@ class _InicioScreenState extends State<InicioScreen> {
             MetricCard(
               icono: Icons.groups_rounded,
               etiquetaSuperior: 'Curso actual',
-              titulo: cursoProvider.cursoSeleccionado?.nombreCompleto ?? 'Ninguno seleccionado',
-              subtitulo: '${cursoProvider.alumnosDelCurso.length} alumnos',
+              titulo: cursoActual?.nombreCompleto ?? 'Ninguno seleccionado',
+              subtitulo: '${alumnos.length} alumnos',
               colorEtiqueta: AppColors.retardo,
             ),
             const SizedBox(height: 12),
@@ -62,6 +74,11 @@ class _InicioScreenState extends State<InicioScreen> {
                   ? 'Proveedor: ${settings.proveedorIA.name}'
                   : 'Ve a Ajustes para activarlo',
               colorEtiqueta: settings.iaConfigurada ? AppColors.presente : AppColors.ausente,
+            ),
+            const SizedBox(height: 24),
+            AiAssistantPanel(
+              contexto: 'Eres un asistente pedagógico experto. Responde de forma breve, clara y accionable para un docente.',
+              datosContexto: datosContexto,
             ),
           ],
         ),

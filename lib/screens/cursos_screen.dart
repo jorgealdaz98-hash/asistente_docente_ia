@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../core/theme/app_theme.dart';
 import '../models/curso.dart';
 import '../providers/curso_provider.dart';
+import '../services/excel_service.dart';
 import 'alumnos_screen.dart';
 
 class CursosScreen extends StatefulWidget {
@@ -13,12 +14,131 @@ class CursosScreen extends StatefulWidget {
 }
 
 class _CursosScreenState extends State<CursosScreen> {
+  final _excelService = ExcelService();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CursoProvider>().cargarCursos();
     });
+  }
+
+  void _mostrarMenuExcel() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Importar desde Excel'),
+        content: const Text('Selecciona una opción:'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.download),
+            label: const Text('Descargar plantilla'),
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              await _descargarPlantilla();
+            },
+          ),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.upload),
+            label: const Text('Importar cursos y alumnos'),
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              await _importarDesdeExcel();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _descargarPlantilla() async {
+    final ruta = await _excelService.generarPlantilla();
+    if (!mounted) return;
+    
+    if (ruta != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Plantilla guardada en: $ruta'),
+          duration: const Duration(seconds: 5),
+          action: SnackBarAction(
+            label: 'Abrir carpeta',
+            onPressed: () {
+              // En Windows esto abriría el explorador
+              // Por ahora solo mostramos la ruta
+            },
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error al generar la plantilla')),
+      );
+    }
+  }
+
+  Future<void> _importarDesdeExcel() async {
+    final ruta = await _excelService.seleccionarArchivo();
+    if (!mounted) return;
+
+    if (ruta == null) return;
+
+    // Mostrar indicador de carga
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    final resultado = await _excelService.importarCursosYAlumnos(ruta);
+    
+    if (!mounted) return;
+    Navigator.pop(context); // Cerrar loading
+
+    // Recargar cursos
+    await context.read<CursoProvider>().cargarCursos();
+
+    // Mostrar resultados
+    if (resultado.containsKey('error')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${resultado['error']}')),
+      );
+    } else {
+      final creados = resultado['creados'] as int;
+      final omitidos = resultado['omitidos'] as int;
+      final advertencias = resultado['advertencias'] as List<String>;
+
+      String mensaje = '✓ Importación completada\n';
+      mensaje += '• Elementos creados: $creados\n';
+      mensaje += '• Elementos omitidos (duplicados): $omitidos';
+      
+      if (advertencias.isNotEmpty) {
+        mensaje += '\n\n⚠️ Advertencias:\n${advertencias.take(5).join('\n')}';
+        if (advertencias.length > 5) {
+          mensaje += '\n...y ${advertencias.length - 5} más';
+        }
+      }
+
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Resumen de importación'),
+          content: SingleChildScrollView(
+            child: SelectableText(mensaje),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Aceptar'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   void _abrirFormulario({Curso? curso}) {
@@ -84,8 +204,18 @@ class _CursosScreenState extends State<CursosScreen> {
     final provider = context.watch<CursoProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Cursos')),
+      appBar: AppBar(
+        title: const Text('Cursos'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.upload_file),
+            tooltip: 'Importar desde Excel',
+            onPressed: _mostrarMenuExcel,
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_cursos_nuevo',
         onPressed: () => _abrirFormulario(),
         child: const Icon(Icons.add),
       ),

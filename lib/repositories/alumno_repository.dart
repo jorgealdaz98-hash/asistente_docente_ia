@@ -17,6 +17,18 @@ class AlumnoRepository {
     return maps.map((m) => Alumno.fromMap(m)).toList();
   }
 
+  /// Busca un alumno por nombre y curso (para evitar duplicados en importación)
+  Future<Alumno?> buscarPorNombreYCurso(String nombre, String cursoId) async {
+    final db = await _dbHelper.database;
+    final maps = await db.query(
+      'alumnos',
+      where: 'LOWER(nombre) = ? AND curso_id = ?',
+      whereArgs: [nombre.toLowerCase().trim(), cursoId],
+    );
+    if (maps.isEmpty) return null;
+    return Alumno.fromMap(maps.first);
+  }
+
   Future<Alumno> crear({
     required String cursoId,
     required String nombre,

@@ -16,6 +16,7 @@ class AsistenciaProvider extends ChangeNotifier {
   bool _sesionIniciada = false;
   bool _escuchando = false;
   String _ultimoReconocido = '';
+  DateTime? _fechaSesion;
 
   bool get sesionIniciada => _sesionIniciada;
   bool get escuchando => _escuchando;
@@ -23,6 +24,7 @@ class AsistenciaProvider extends ChangeNotifier {
   int get indiceActual => _indiceActual;
   int get total => _lista.length;
   Map<String, EstadoAsistencia> get resultados => _resultados;
+  DateTime? get fechaSesion => _fechaSesion;
 
   Alumno? get alumnoActual =>
       (_indiceActual >= 0 && _indiceActual < _lista.length) ? _lista[_indiceActual] : null;
@@ -38,11 +40,23 @@ class AsistenciaProvider extends ChangeNotifier {
 
   Future<void> inicializarVoz() => voiceService.inicializar();
 
-  void iniciarSesion(List<Alumno> alumnos) {
+  void iniciarSesion(List<Alumno> alumnos, {DateTime? fecha}) {
     _lista = List.of(alumnos);
     _indiceActual = 0;
     _resultados.clear();
     _sesionIniciada = true;
+    _fechaSesion = fecha ?? DateTime.now();
+    notifyListeners();
+  }
+
+  /// Carga el historial de asistencia de una fecha específica
+  Future<void> cargarHistorial({required String cursoId, required DateTime fecha}) async {
+    final registros = await _asistenciaRepo.obtenerPorCursoYFecha(cursoId, fecha);
+    _resultados.clear();
+    for (var reg in registros) {
+      _resultados[reg.alumnoId] = reg.estado;
+    }
+    _fechaSesion = fecha;
     notifyListeners();
   }
 
@@ -83,12 +97,34 @@ class AsistenciaProvider extends ChangeNotifier {
     final alumno = alumnoActual;
     if (alumno == null) return;
 
-    await _asistenciaRepo.registrar(
+    // Verificar si ya existe registro para hoy
+    final hoy = _fechaSesion ?? DateTime.now();
+    final yaExiste = await _asistenciaRepo.existeRegistro(
       alumnoId: alumno.id,
       cursoId: cursoId,
-      estado: estado,
-      metodo: metodo,
+      fecha: hoy,
     );
+
+    if (yaExiste) {
+      // Obtener el registro existente y actualizarlo
+      final registros = await _asistenciaRepo.obtenerPorCursoYFecha(cursoId, hoy);
+      final registroExistente = registros.firstWhere((r) => r.alumnoId == alumno.id);
+      await _asistenciaRepo.actualizar(
+        id: registroExistente.id,
+        estado: estado,
+        metodo: metodo,
+      );
+    } else {
+      // Crear nuevo registro
+      await _asistenciaRepo.registrar(
+        alumnoId: alumno.id,
+        cursoId: cursoId,
+        estado: estado,
+        metodo: metodo,
+        fecha: hoy,
+      );
+    }
+    
     await _alumnoRepo.recalcularAsistenciaHabitual(alumno.id);
 
     _resultados[alumno.id] = estado;

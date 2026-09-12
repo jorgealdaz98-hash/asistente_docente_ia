@@ -35,6 +35,20 @@ dependencies:
   uuid: ^4.4.2
   shared_preferences: ^2.2.3
 
+  # Importación/Exportación Excel
+  excel: ^4.0.6
+  file_picker: ^8.0.7
+
+  # Generación de PDF
+  pdf: ^3.10.8
+  printing: ^5.12.0
+
+  # Comunicación (WhatsApp, Email, SMS)
+  url_launcher: ^6.2.5
+
+  # Gráficos para estadísticas
+  fl_chart: ^0.66.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -42,6 +56,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  # Descomenta y agrega tus fuentes/íconos si los incorporas al proyecto
-  # assets:
-  #   - assets/

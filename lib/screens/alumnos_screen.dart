@@ -47,6 +47,7 @@ class AlumnosScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(curso?.nombreCompleto ?? 'Alumnos')),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_alumnos_${curso?.id ?? "nuevo"}',
         onPressed: () => _abrirFormularioAlumno(context),
         child: const Icon(Icons.person_add),
       ),

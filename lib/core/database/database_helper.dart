@@ -93,6 +93,60 @@ class DatabaseHelper {
         FOREIGN KEY (curso_id) REFERENCES cursos (id) ON DELETE CASCADE
       );
     ''');
+
+    // Tablas nuevas para funcionalidades extendidas
+    await db.execute('''
+      CREATE TABLE tareas (
+        id TEXT PRIMARY KEY,
+        curso_id TEXT NOT NULL,
+        titulo TEXT NOT NULL,
+        descripcion TEXT NOT NULL,
+        fecha_asignacion TEXT NOT NULL,
+        fecha_entrega TEXT,
+        es_activa INTEGER NOT NULL DEFAULT 1,
+        FOREIGN KEY (curso_id) REFERENCES cursos (id) ON DELETE CASCADE
+      );
+    ''');
+
+    await db.execute('''
+      CREATE TABLE incidencias (
+        id TEXT PRIMARY KEY,
+        alumno_id TEXT NOT NULL,
+        curso_id TEXT NOT NULL,
+        tipo TEXT NOT NULL,
+        descripcion TEXT NOT NULL,
+        fecha TEXT NOT NULL,
+        gravedad TEXT,
+        FOREIGN KEY (alumno_id) REFERENCES alumnos (id) ON DELETE CASCADE,
+        FOREIGN KEY (curso_id) REFERENCES cursos (id) ON DELETE CASCADE
+      );
+    ''');
+
+    await db.execute('''
+      CREATE TABLE contactos_padres (
+        id TEXT PRIMARY KEY,
+        alumno_id TEXT NOT NULL,
+        nombre TEXT NOT NULL,
+        parentesco TEXT NOT NULL,
+        telefono TEXT,
+        email TEXT,
+        prefiere_whatsapp INTEGER NOT NULL DEFAULT 0,
+        FOREIGN KEY (alumno_id) REFERENCES alumnos (id) ON DELETE CASCADE
+      );
+    ''');
+
+    await db.execute('''
+      CREATE TABLE calendario_eventos (
+        id TEXT PRIMARY KEY,
+        curso_id TEXT,
+        titulo TEXT NOT NULL,
+        descripcion TEXT,
+        fecha_inicio TEXT NOT NULL,
+        fecha_fin TEXT,
+        tipo TEXT NOT NULL,
+        recordatorio INTEGER NOT NULL DEFAULT 0
+      );
+    ''');
   }
 
   Future<void> close() async {

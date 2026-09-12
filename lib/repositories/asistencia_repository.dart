@@ -52,4 +52,52 @@ class AsistenciaRepository {
     );
     return maps.map((m) => RegistroAsistencia.fromMap(m)).toList();
   }
+
+  /// Obtiene todos los registros de asistencia de un curso
+  Future<List<RegistroAsistencia>> obtenerPorCurso(String cursoId) async {
+    final db = await _dbHelper.database;
+    final maps = await db.query(
+      'asistencias',
+      where: 'curso_id = ?',
+      whereArgs: [cursoId],
+      orderBy: 'fecha DESC',
+    );
+    return maps.map((m) => RegistroAsistencia.fromMap(m)).toList();
+  }
+
+  /// Verifica si ya existe un registro para un alumno en una fecha específica
+  Future<bool> existeRegistro({
+    required String alumnoId,
+    required String cursoId,
+    required DateTime fecha,
+  }) async {
+    final db = await _dbHelper.database;
+    final inicio = DateTime(fecha.year, fecha.month, fecha.day);
+    final fin = inicio.add(const Duration(days: 1));
+
+    final maps = await db.query(
+      'asistencias',
+      where: 'alumno_id = ? AND curso_id = ? AND fecha >= ? AND fecha < ?',
+      whereArgs: [alumnoId, cursoId, inicio.toIso8601String(), fin.toIso8601String()],
+    );
+    return maps.isNotEmpty;
+  }
+
+  /// Actualiza un registro existente (para evitar duplicados)
+  Future<void> actualizar({
+    required String id,
+    required EstadoAsistencia estado,
+    MetodoRegistro? metodo,
+  }) async {
+    final db = await _dbHelper.database;
+    await db.update(
+      'asistencias',
+      {
+        'estado': estado.name,
+        if (metodo != null) 'metodo': metodo.name,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
 }

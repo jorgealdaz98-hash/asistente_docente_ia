@@ -4,6 +4,8 @@ import '../core/theme/app_theme.dart';
 import '../models/calificacion.dart';
 import '../providers/curso_provider.dart';
 import '../repositories/calificacion_repository.dart';
+import '../services/exportacion_excel_service.dart';
+import '../services/reporte_pdf_service.dart';
 
 class NotasScreen extends StatefulWidget {
   const NotasScreen({super.key});
@@ -14,6 +16,8 @@ class NotasScreen extends StatefulWidget {
 
 class _NotasScreenState extends State<NotasScreen> {
   final _repo = CalificacionRepository();
+  final _exportacionService = ExportacionExcelService();
+  final _reportePdfService = ReportePdfService();
   List<Calificacion> _calificaciones = [];
   double _promedio = 0;
   bool _cargando = true;
@@ -102,8 +106,23 @@ class _NotasScreenState extends State<NotasScreen> {
     final curso = context.watch<CursoProvider>().cursoSeleccionado;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Notas')),
+      appBar: AppBar(
+        title: const Text('Notas'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.file_download),
+            onPressed: curso == null ? null : _exportarExcel,
+            tooltip: 'Exportar a Excel',
+          ),
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf),
+            onPressed: curso == null ? null : _generarPDF,
+            tooltip: 'Generar Boletín PDF',
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_notas_${curso?.id ?? "nuevo"}',
         onPressed: curso == null ? null : _abrirFormulario,
         child: const Icon(Icons.add),
       ),
@@ -151,5 +170,89 @@ class _NotasScreenState extends State<NotasScreen> {
                   ],
                 ),
     );
+  }
+
+  void _exportarExcel() async {
+    final curso = context.read<CursoProvider>().cursoSeleccionado;
+    if (curso == null) return;
+
+    try {
+      final alumnos = context.read<CursoProvider>().alumnosDelCurso;
+      final file = await _exportacionService.exportarNotas(
+        curso: curso,
+        alumnos: alumnos,
+        calificaciones: _calificaciones,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Archivo guardado: ${file.path}')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al exportar: $e')),
+        );
+      }
+    }
+  }
+
+  void _generarPDF() async {
+    final curso = context.read<CursoProvider>().cursoSeleccionado;
+    if (curso == null) return;
+
+    final alumnos = context.read<CursoProvider>().alumnosDelCurso;
+    if (alumnos.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No hay alumnos en este curso')),
+      );
+      return;
+    }
+
+    // Mostrar selector de alumno para generar boletín individual
+    final alumnoSeleccionado = await showDialog<Alumno>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Seleccionar alumno'),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 300,
+          child: ListView.builder(
+            itemCount: alumnos.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text(alumnos[index].nombre),
+                onTap: () => Navigator.pop(ctx, alumnos[index]),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+        ],
+      ),
+    );
+
+    if (alumnoSeleccionado == null) return;
+
+    try {
+      final califsAlumno = _calificaciones.where((c) => c.alumnoId == alumnoSeleccionado.id).toList();
+      final file = await _reportePdfService.generarBoletinNotas(
+        alumno: alumnoSeleccionado,
+        curso: curso,
+        calificaciones: califsAlumno,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Boletín generado: ${file.path}')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al generar PDF: $e')),
+        );
+      }
+    }
   }
 }
