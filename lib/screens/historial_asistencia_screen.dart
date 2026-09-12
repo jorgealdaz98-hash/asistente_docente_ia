@@ -153,6 +153,9 @@ class _HistorialAsistenciaScreenState extends State<HistorialAsistenciaScreen> {
   }
 
   Widget _tarjetaFecha(Curso curso) {
+    // Inicializar formato de fecha para español
+    Intl.defaultLocale = 'es_ES';
+    
     return Card(
       margin: const EdgeInsets.all(16),
       child: Padding(
