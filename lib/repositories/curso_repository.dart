@@ -19,6 +19,18 @@ class CursoRepository {
     return Curso.fromMap(maps.first);
   }
 
+  /// Busca un curso por nombre y paralelo (para evitar duplicados en importación)
+  Future<Curso?> buscarPorNombreYParalelo(String nombre, String paralelo) async {
+    final db = await _dbHelper.database;
+    final maps = await db.query(
+      'cursos',
+      where: 'LOWER(nombre) = ? AND LOWER(paralelo) = ?',
+      whereArgs: [nombre.toLowerCase().trim(), paralelo.toLowerCase().trim()],
+    );
+    if (maps.isEmpty) return null;
+    return Curso.fromMap(maps.first);
+  }
+
   Future<Curso> crear({
     required String nombre,
     required String paralelo,

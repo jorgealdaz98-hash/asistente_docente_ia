@@ -7,6 +7,7 @@ import '../providers/asistencia_provider.dart';
 import '../widgets/student_roll_card.dart';
 import '../widgets/attendance_toggle.dart';
 import '../widgets/ai_assistant_panel.dart';
+import 'historial_asistencia_screen.dart';
 
 class AsistenciaScreen extends StatefulWidget {
   const AsistenciaScreen({super.key});
@@ -40,6 +41,16 @@ class _AsistenciaScreenState extends State<AsistenciaScreen> {
       appBar: AppBar(
         title: const Text('Asistencia'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HistorialAsistenciaScreen()),
+              );
+            },
+            tooltip: 'Ver historial',
+          ),
           if (cursoProvider.cursos.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(right: 12),

@@ -6,8 +6,9 @@ import '../providers/settings_provider.dart';
 
 class AiAssistantPanel extends StatefulWidget {
   final String? contexto; // ej. datos del curso/alumno actual
+  final Map<String, dynamic>? datosContexto; // Datos estructurados para contexto enriquecido
 
-  const AiAssistantPanel({super.key, this.contexto});
+  const AiAssistantPanel({super.key, this.contexto, this.datosContexto});
 
   @override
   State<AiAssistantPanel> createState() => _AiAssistantPanelState();
@@ -26,7 +27,32 @@ class _AiAssistantPanelState extends State<AiAssistantPanel> {
   void _enviar(String texto) {
     final settings = context.read<SettingsProvider>();
     final assistant = context.read<AiAssistantProvider>();
-    assistant.enviarConsulta(settings.crearServicioIA(), texto, contexto: widget.contexto);
+    
+    // Construir contexto enriquecido con datos reales si están disponibles
+    String contextoCompleto = widget.contexto ?? '';
+    if (widget.datosContexto != null) {
+      final datos = widget.datosContexto!;
+      if (datos.containsKey('curso')) {
+        contextoCompleto += '\n\nCurso: ${datos['curso']}';
+      }
+      if (datos.containsKey('totalAlumnos')) {
+        contextoCompleto += '\nTotal alumnos: ${datos['totalAlumnos']}';
+      }
+      if (datos.containsKey('promedioGeneral')) {
+        contextoCompleto += '\nPromedio general: ${datos['promedioGeneral']}';
+      }
+      if (datos.containsKey('asistenciaPromedio')) {
+        contextoCompleto += '\nAsistencia promedio: ${datos['asistenciaPromedio']}%';
+      }
+      if (datos.containsKey('alumnosRiesgo') && (datos['alumnosRiesgo'] as List).isNotEmpty) {
+        contextoCompleto += '\nAlumnos con bajo rendimiento: ${(datos['alumnosRiesgo'] as List).join(", ")}';
+      }
+      if (datos.containsKey('ultimasAsistencias')) {
+        contextoCompleto += '\nÚltimas asistencias: ${datos['ultimasAsistencias']}';
+      }
+    }
+    
+    assistant.enviarConsulta(settings.crearServicioIA(), texto, contexto: contextoCompleto.isNotEmpty ? contextoCompleto : null);
     _controller.clear();
   }
 
