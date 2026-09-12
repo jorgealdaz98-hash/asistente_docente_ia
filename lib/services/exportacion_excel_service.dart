@@ -34,12 +34,12 @@ class ExportacionExcelService {
     
     // Encabezados de la tabla
     sheet.appendRow([
-      const TextCellValue('Alumno'),
-      const TextCellValue('Código'),
-      const TextCellValue('Total Presentes'),
-      const TextCellValue('Total Retardos'),
-      const TextCellValue('Total Ausentes'),
-      const TextCellValue('% Asistencia'),
+      TextCellValue('Alumno'),
+      TextCellValue('Código'),
+      TextCellValue('Total Presentes'),
+      TextCellValue('Total Retardos'),
+      TextCellValue('Total Ausentes'),
+      TextCellValue('% Asistencia'),
     ]);
     
     // Calcular estadísticas por alumno
@@ -93,11 +93,11 @@ class ExportacionExcelService {
     
     // Encabezados de la tabla
     sheet.appendRow([
-      const TextCellValue('Alumno'),
-      const TextCellValue('Código'),
-      const TextCellValue('Actividad/Examen'),
-      const TextCellValue('Nota'),
-      const TextCellValue('Fecha'),
+      TextCellValue('Alumno'),
+      TextCellValue('Código'),
+      TextCellValue('Actividad/Examen'),
+      TextCellValue('Nota'),
+      TextCellValue('Fecha'),
     ]);
     
     // Agrupar calificaciones por alumno
