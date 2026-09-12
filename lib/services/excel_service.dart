@@ -176,7 +176,8 @@ class ExcelService {
       }
 
       // Verificar si el alumno ya existe en este curso
-      final alumnoExistente = await _alumnoRepo.buscarPorNombreYCurso(alumnoNombre, curso.id);
+      // Usamos ! porque curso ya no puede ser null aquí
+      final alumnoExistente = await _alumnoRepo.buscarPorNombreYCurso(alumnoNombre, curso!.id);
       if (alumnoExistente != null) {
         advertencias.add('Fila $i: "$alumnoNombre" ya existe en ${curso.nombreCompleto}, se omite.');
         omitidos++;

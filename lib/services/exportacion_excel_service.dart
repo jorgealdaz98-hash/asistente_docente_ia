@@ -34,12 +34,12 @@ class ExportacionExcelService {
     
     // Encabezados de la tabla
     sheet.appendRow([
-      TextCellValue('Alumno', style: CellStyle(bold: true)),
-      TextCellValue('Código', style: CellStyle(bold: true)),
-      TextCellValue('Total Presentes', style: CellStyle(bold: true)),
-      TextCellValue('Total Retardos', style: CellStyle(bold: true)),
-      TextCellValue('Total Ausentes', style: CellStyle(bold: true)),
-      TextCellValue('% Asistencia', style: CellStyle(bold: true)),
+      const TextCellValue('Alumno'),
+      const TextCellValue('Código'),
+      const TextCellValue('Total Presentes'),
+      const TextCellValue('Total Retardos'),
+      const TextCellValue('Total Ausentes'),
+      const TextCellValue('% Asistencia'),
     ]);
     
     // Calcular estadísticas por alumno
@@ -57,7 +57,7 @@ class ExportacionExcelService {
         IntCellValue(presentes),
         IntCellValue(retardos),
         IntCellValue(ausentes),
-        DoubleCellValue(porcentaje, decimalDigits: 1),
+        DoubleCellValue(porcentaje),
       ]);
     }
     
@@ -93,11 +93,11 @@ class ExportacionExcelService {
     
     // Encabezados de la tabla
     sheet.appendRow([
-      TextCellValue('Alumno', style: CellStyle(bold: true)),
-      TextCellValue('Código', style: CellStyle(bold: true)),
-      TextCellValue('Actividad/Examen', style: CellStyle(bold: true)),
-      TextCellValue('Nota', style: CellStyle(bold: true)),
-      TextCellValue('Fecha', style: CellStyle(bold: true)),
+      const TextCellValue('Alumno'),
+      const TextCellValue('Código'),
+      const TextCellValue('Actividad/Examen'),
+      const TextCellValue('Nota'),
+      const TextCellValue('Fecha'),
     ]);
     
     // Agrupar calificaciones por alumno
@@ -124,7 +124,7 @@ class ExportacionExcelService {
             TextCellValue(primerFila ? alumno.nombre : ''),
             TextCellValue(primerFila ? (alumno.codigo ?? '') : ''),
             TextCellValue(calif.titulo),
-            DoubleCellValue(calif.nota, decimalDigits: 1),
+            DoubleCellValue(calif.nota),
             TextCellValue('${calif.fecha.day}/${calif.fecha.month}/${calif.fecha.year}'),
           ]);
           primerFila = false;
