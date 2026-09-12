@@ -19,38 +19,38 @@ class ExcelService {
 
       // Encabezados
       sheet.appendRow([
-        const TextCellValue('Curso'),
-        const TextCellValue('Paralelo'),
-        const TextCellValue('Turno'),
-        const TextCellValue('Aula'),
-        const TextCellValue('Alumno'),
-        const TextCellValue('Codigo'),
+        TextCellValue('Curso'),
+        TextCellValue('Paralelo'),
+        TextCellValue('Turno'),
+        TextCellValue('Aula'),
+        TextCellValue('Alumno'),
+        TextCellValue('Codigo'),
       ]);
 
       // Datos de ejemplo
       sheet.appendRow([
-        const TextCellValue('Matemáticas'),
-        const TextCellValue('3° B'),
-        const TextCellValue('Matutino'),
-        const TextCellValue('101'),
-        const TextCellValue('Juan Pérez'),
-        const TextCellValue('JP001'),
+        TextCellValue('Matemáticas'),
+        TextCellValue('3° B'),
+        TextCellValue('Matutino'),
+        TextCellValue('101'),
+        TextCellValue('Juan Pérez'),
+        TextCellValue('JP001'),
       ]);
       sheet.appendRow([
-        const TextCellValue('Matemáticas'),
-        const TextCellValue('3° B'),
-        const TextCellValue('Matutino'),
-        const TextCellValue('101'),
-        const TextCellValue('María García'),
-        const TextCellValue('MG002'),
+        TextCellValue('Matemáticas'),
+        TextCellValue('3° B'),
+        TextCellValue('Matutino'),
+        TextCellValue('101'),
+        TextCellValue('María García'),
+        TextCellValue('MG002'),
       ]);
       sheet.appendRow([
-        const TextCellValue('Historia'),
-        const TextCellValue('4° A'),
-        const TextCellValue('Vespertino'),
-        const TextCellValue('205'),
-        const TextCellValue('Carlos López'),
-        const TextCellValue('CL003'),
+        TextCellValue('Historia'),
+        TextCellValue('4° A'),
+        TextCellValue('Vespertino'),
+        TextCellValue('205'),
+        TextCellValue('Carlos López'),
+        TextCellValue('CL003'),
       ]);
 
       // Guardar en Documents
@@ -176,8 +176,8 @@ class ExcelService {
       }
 
       // Verificar si el alumno ya existe en este curso
-      // Usamos ! porque curso ya no puede ser null aquí
-      final alumnoExistente = await _alumnoRepo.buscarPorNombreYCurso(alumnoNombre, curso!.id);
+      // curso ya no puede ser null aquí porque lo creamos o recuperamos arriba
+      final alumnoExistente = await _alumnoRepo.buscarPorNombreYCurso(alumnoNombre, curso.id);
       if (alumnoExistente != null) {
         advertencias.add('Fila $i: "$alumnoNombre" ya existe en ${curso.nombreCompleto}, se omite.');
         omitidos++;

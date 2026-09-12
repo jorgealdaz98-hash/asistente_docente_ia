@@ -31,6 +31,28 @@ class CursoRepository {
     return Curso.fromMap(maps.first);
   }
 
+  /// Crea un curso con un ID específico (usado en importación desde Excel)
+  Future<Curso> crearConId({
+    required String id,
+    required String nombre,
+    required String paralelo,
+    required String turno,
+    required String aula,
+    String unidadActual = '',
+  }) async {
+    final db = await _dbHelper.database;
+    final curso = Curso(
+      id: id,
+      nombre: nombre,
+      paralelo: paralelo,
+      turno: turno,
+      aula: aula,
+      unidadActual: unidadActual,
+    );
+    await db.insert('cursos', curso.toMap());
+    return curso;
+  }
+
   Future<Curso> crear({
     required String nombre,
     required String paralelo,
